@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家庭菜谱生成器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#4CAF50;--primary-dark:#388E3C;--primary-light:#C8E6C9;--bg:#F5F5F5;--white:#fff;--text:#333;--text-light:#666;--border:#E0E0E0;--shadow:0 2px 8px rgba(0,0,0,0.1);--radius:12px}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.container{max-width:600px;margin:0 auto;padding:15px}
+.header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:var(--white);padding:20px;border-radius:var(--radius);margin-bottom:15px;text-align:center}
+.header h1{font-size:1.5em;margin-bottom:5px}
+.card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:15px;box-shadow:var(--shadow)}
+.card h2{font-size:1.2em;color:var(--primary);margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid var(--primary-light)}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-weight:500;margin-bottom:4px;font-size:0.95em}
+.form-group input,.form-group select{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:1em}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--radius);cursor:pointer;font-size:1em;font-weight:500;background:var(--primary);color:var(--white)}
+.btn:hover{background:var(--primary-dark)}
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:15px}
+.tab{flex:1;padding:10px;text-align:center;cursor:pointer;border-bottom:3px solid transparent;font-size:0.95em}
+.tab.active{border-bottom-color:var(--primary);color:var(--primary);font-weight:600}
+.collapse-header{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg);border-radius:8px;cursor:pointer;margin-bottom:12px}
+.collapse-header:hover{background:#eee}
+.collapse-title{font-weight:600}
+.collapse-icon{font-size:1.2em}
+.collapse-content{display:none}
+.collapse-content.open{display:block}
+.bmi-display{display:flex;gap:10px;margin-top:12px;padding:10px;background:#f5f5f5;border-radius:8px}
+.bmi-item{flex:1;text-align:center}
+.bmi-value{font-size:1.1em;font-weight:600;color:var(--primary)}
+.bmi-label{font-size:0.8em;color:var(--text-light)}
+.training-check{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.training-check label{display:flex;align-items:center;gap:4px;padding:6px 10px;background:var(--bg);border-radius:6px;font-size:0.9em;cursor:pointer}
+.training-check label.checked{background:var(--primary-light);color:var(--primary-dark)}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.checkbox-item{display:flex;align-items:center;gap:4px;padding:6px 10px;background:#e3f2fd;border-radius:6px;font-size:0.9em;cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fav-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.fav-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:#e3f2fd;border-radius:15px;font-size:0.9em}
+.fav-tag button{background:none;border:none;color:#f44336;cursor:pointer;padding:0;font-size:1em}
+.add-fav{display:flex;gap:8px;margin-top:8px}
+.add-fav input{flex:1;padding:8px;border:1px solid var(--border);border-radius:6px}
+.add-fav button{padding:8px 12px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer}
+.recipe-day{margin-bottom:15px;padding:15px;background:var(--white);border-radius:12px;box-shadow:var(--shadow)}
+.day-title{font-size:1.1em;font-weight:600;color:var(--primary);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.recipe-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg);border-radius:8px;margin-bottom:6px}
+.recipe-item .name{font-weight:500}
+.recipe-item .nutri{font-size:0.85em;color:var(--text-light)}
+.recipe-item .protein{color:var(--primary);font-weight:600}
+.protein-tag{color:var(--primary);font-weight:600}
+.training-badge{display:inline-block;padding:4px 10px;background:linear-gradient(135deg,#FF6B6B,#EE5A5A);color:white;border-radius:12px;font-size:0.8em;margin-left:8px}
+.nutrition-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.nutrition-item{text-align:center;padding:12px;background:var(--bg);border-radius:8px}
+.nutrition-item .value{font-size:1.5em;font-weight:700;color:var(--primary)}
+.shopping-category{margin-bottom:15px}
+.shopping-category h3{color:var(--primary);margin-bottom:8px;font-size:1em}
+.shopping-item{display:flex;justify-content:space-between;padding:6px 0;font-size:0.95em}
+.meal-section{margin-bottom:12px}
+.meal-title{font-size:0.9em;color:var(--text-light);margin-bottom:6px}
+.husband-fav{color:#E91E63;font-size:0.85em}
+.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.75em;margin-left:6px}
+.recipe-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;background:var(--bg);border-radius:4px;font-size:0.85em}
+.recipe-tag i{font-style:normal;cursor:pointer;color:#999;margin-left:4px}
+.recipe-tag i:hover{color:red}
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:0.95em}
+.alert-warning{background:#FFF3E0;color:#E65100;border-left:4px solid #FF9800}
+.alert-success{background:#E8F5E9;color:#2E7D32;border-left:4px solid #4CAF50}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>家庭菜谱生成器</h1>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tab-gen" onclick="switchTab('generate')">生成菜谱</div>
+    <div class="tab" id="tab-nut" onclick="switchTab('nutrition')">营养分析</div>
+    <div class="tab" id="tab-shop" onclick="switchTab('shopping')">购物清单</div>
+    <div class="tab" id="tab-set" onclick="switchTab('settings')">设置</div>
+  </div>
+  
+  <div id="tab-generate">
+    <div class="card">
+      <h2>本周菜谱设置</h2>
+      <div class="form-group">
+        <label>开始日期（周一）</label>
+        <input type="date" id="startDate">
+      </div>
+      <button class="btn" onclick="generateRecipe()">生成本周菜谱</button>
+    </div>
+    <div id="recipeResult"></div>
+    <div id="recipeStats"></div>
+  </div>
+  
+  <div id="tab-nutrition" style="display:none">
+    <div class="card"><h2>每日营养摄入</h2><div id="nutritionResult"></div></div>
+  </div>
+  
+  <div id="tab-shopping" style="display:none">
+    <div class="card"><h2>本周采购清单</h2><div id="shoppingList"></div></div>
+  </div>
+  
+  <div id="tab-settings" style="display:none">
+    <div class="card">
+      <h2>设置</h2>
+      <div id="settingsForm"></div>
+      <button class="btn" style="margin-top:15px" onclick="saveSettings()">保存设置</button>
+    </div>
+  </div>
+</div>
+<script>
+// 食材数据库
+let INGREDIENTS = {
+  '菠菜':{protein:2.6,category:'leafy'},'白菜':{protein:1.5,category:'leafy'},'蒿子杆':{protein:1.9,category:'leafy'},
+  '西兰花':{protein:2.8,category:'leafy'},'西红柿':{protein:0.9,category:'vegetable'},
+  '鸡腿肉':{protein:20,category:'meat'},'鸡胸肉':{protein:23.3,category:'meat'},'牛肉':{protein:20.2,category:'meat'},
+  '猪肉':{protein:13.2,category:'meat'},'北极冰虾':{protein:18,category:'seafood'},'鸡蛋':{protein:13.3,category:'egg'},
+  '北豆腐':{protein:8.1,category:'tofu'},'干豆腐':{protein:16,category:'tofu'},'平菇':{protein:2.2,category:'mushroom'},
+  '香菜':{protein:1.8,category:'leafy'},'辣椒':{protein:1,category:'vegetable'},
+  '西葫芦':{protein:0.9},'土豆':{protein:2},'胡萝卜':{protein:1},'洋葱':{protein:1.1}
+};
+
+// 加载食材数据
+try{
+  const stored=localStorage.getItem('ingredientsDB');
+  if(stored)INGREDIENTS=JSON.parse(stored);
+}catch(e){}
+
+function saveIngredientsDB(){
+  localStorage.setItem('ingredientsDB',JSON.stringify(INGREDIENTS));
+}
+
+function exportData(){
+  const data={
+    settings:settings,
+    recipeDB:recipeDB,
+    ingredients:INGREDIENTS,
+    exportTime:new Date().toISOString()
+  };
+  const blob=new Blob([JSON.stringify(data, null, 2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`菜谱数据_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(){
+  const input=document.createElement('input');
+  input.type='file';
+  input.accept='.json';
+  input.onchange=async(e)=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    try{
+      const text=await file.text();
+      const data=JSON.parse(text);
+      if(data.settings){
+        settings=data.settings;
+        localStorage.setItem('recipeSettings',JSON.stringify(settings));
+      }
+      if(data.recipeDB){
+        recipeDB=data.recipeDB;
+        localStorage.setItem('recipeDB',JSON.stringify(recipeDB));
+      }
+      if(data.ingredients){
+        INGREDIENTS=data.ingredients;
+        localStorage.setItem('ingredientsDB',JSON.stringify(INGREDIENTS));
+      }
+      renderSettings();
+      alert('数据导入成功！');
+    }catch(err){
+      alert('导入失败：'+err.message);
+    }
+  };
+  input.click();
+}
+
+// 默认菜谱库
+const DEFAULT_RECIPES = {
+  meat:[
+    {name:'鸡腿肉',method:'红烧鸡腿',ingredients:[{name:'鸡腿肉',qty:200}]},
+    {name:'鸡腿肉',method:'酱香鸡腿',ingredients:[{name:'鸡腿肉',qty:200}]},
+    {name:'鸡腿肉',method:'黄焖鸡',ingredients:[{name:'鸡腿肉',qty:200},{name:'土豆',qty:100}]},
+    {name:'鸡胸肉',method:'宫保鸡丁',ingredients:[{name:'鸡胸肉',qty:200}]},
+    {name:'鸡胸肉',method:'鸡丝拌豆腐',ingredients:[{name:'鸡胸肉',qty:100},{name:'北豆腐',qty:150}]},
+    {name:'鸡胸肉',method:'辣子鸡',ingredients:[{name:'鸡胸肉',qty:200},{name:'辣椒',qty:50}]},
+    {name:'牛肉',method:'小炒黄牛肉',ingredients:[{name:'牛肉',qty:200}]},
+    {name:'牛肉',method:'萝卜炖牛肉',ingredients:[{name:'牛肉',qty:200},{name:'萝卜',qty:150}]},
+    {name:'牛肉',method:'洋葱炒牛肉',ingredients:[{name:'牛肉',qty:200},{name:'洋葱',qty:100}]},
+    {name:'牛肉',method:'土豆烧牛肉',ingredients:[{name:'牛肉',qty:200},{name:'土豆',qty:150}]},
+    {name:'牛肉',method:'番茄牛腩',ingredients:[{name:'牛肉',qty:200},{name:'西红柿',qty:150}]},
+    {name:'牛肉',method:'芹菜炒牛肉',ingredients:[{name:'牛肉',qty:200},{name:'芹菜',qty:100}]},
+    {name:'羊肉',method:'红烧羊肉',ingredients:[{name:'羊肉',qty:200}]},
+    {name:'羊肉',method:'孜然羊肉',ingredients:[{name:'羊肉',qty:200}]},
+    {name:'猪肉',method:'红烧肉',ingredients:[{name:'猪肉',qty:200}]},
+    {name:'猪肉',method:'糖醋里脊',ingredients:[{name:'猪肉',qty:200}]},
+    {name:'猪肉',method:'回锅肉',ingredients:[{name:'猪肉',qty:200},{name:'青椒',qty:50}]},
+    {name:'猪肉',method:'鱼香肉丝',ingredients:[{name:'猪肉',qty:200},{name:'木耳',qty:30}]},
+    {name:'大虾',method:'油焖大虾',ingredients:[{name:'大虾',qty:200}]},
+    {name:'大虾',method:'虾仁滑蛋',ingredients:[{name:'大虾',qty:150},{name:'鸡蛋',qty:50}]},
+  ],
+  seafood:[
+    {name:'鲈鱼',method:'清蒸鲈鱼',ingredients:[{name:'鲈鱼',qty:200}]},
+    {name:'鲈鱼',method:'红烧鲈鱼',ingredients:[{name:'鲈鱼',qty:200}]},
+    {name:'鳕鱼',method:'香煎鳕鱼',ingredients:[{name:'鳕鱼',qty:200}]},
+    {name:'鳕鱼',method:'鳕鱼豆腐煲',ingredients:[{name:'鳕鱼',qty:150},{name:'北豆腐',qty:100}]},
+    {name:'鲳鱼',method:'红烧鲳鱼',ingredients:[{name:'鲳鱼',qty:200}]},
+    {name:'鲳鱼',method:'清蒸鲳鱼',ingredients:[{name:'鲳鱼',qty:200}]},
+    {name:'扇贝',method:'蒜蓉粉丝蒸扇贝',ingredients:[{name:'扇贝',qty:200},{name:'粉丝',qty:30}]},
+    {name:'蛤蜊',method:'蛤蜊蒸蛋',ingredients:[{name:'蛤蜊',qty:150},{name:'鸡蛋',qty:50}]},
+  ],
+  leafy:[
+    {name:'菠菜',method:'蒜蓉菠菜',ingredients:[{name:'菠菜',qty:200}],lowGI:true},
+    {name:'菠菜',method:'菠菜蛋花汤',ingredients:[{name:'菠菜',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
+    {name:'生菜',method:'蒜蓉生菜',ingredients:[{name:'生菜',qty:200}],lowGI:true},
+    {name:'西兰花',method:'蒜蓉西兰花',ingredients:[{name:'西兰花',qty:200}],lowGI:true},
+    {name:'西兰花',method:'西兰花炒虾',ingredients:[{name:'西兰花',qty:200},{name:'大虾',qty:80}],lowGI:true},
+    {name:'白菜',method:'醋溜白菜',ingredients:[{name:'白菜',qty:200}],lowGI:true},
+    {name:'白菜',method:'白菜炖豆腐',ingredients:[{name:'白菜',qty:200},{name:'北豆腐',qty:100}],lowGI:true},
+    {name:'白菜',method:'乾隆白菜',ingredients:[{name:'白菜',qty:200}],lowGI:true},
+    {name:'白菜',method:'白菜炒肉',ingredients:[{name:'白菜',qty:200},{name:'猪肉',qty:80}],lowGI:true},
+    {name:'香菜',method:'香菜拌豆皮',ingredients:[{name:'香菜',qty:150},{name:'干豆腐',qty:100}],lowGI:true},
+    {name:'辣椒',method:'虎皮青椒',ingredients:[{name:'辣椒',qty:200}],lowGI:true},
+    {name:'辣椒',method:'辣椒炒蛋',ingredients:[{name:'辣椒',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
+    {name:'青椒',method:'青椒炒肉',ingredients:[{name:'青椒',qty:200},{name:'猪肉',qty:80}],lowGI:true},
+    {name:'北豆腐',method:'家常豆腐',ingredients:[{name:'北豆腐',qty:200}],lowGI:true},
+    {name:'北豆腐',method:'肉末豆腐',ingredients:[{name:'北豆腐',qty:200},{name:'猪肉',qty:50}],lowGI:true},
+    {name:'干豆腐',method:'尖椒干豆腐',ingredients:[{name:'干豆腐',qty:150},{name:'辣椒',qty:100}],lowGI:true},
+    {name:'平菇',method:'平菇炒蛋',ingredients:[{name:'平菇',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
+    {name:'平菇',method:'蒜蓉平菇',ingredients:[{name:'平菇',qty:200}],lowGI:true},
+    {name:'香菇',method:'香菇炒油菜',ingredients:[{name:'香菇',qty:100},{name:'油菜',qty:150}],lowGI:true},
+    {name:'金针菇',method:'蒜蓉金针菇',ingredients:[{name:'金针菇',qty:200}],lowGI:true},
+    {name:'杏鲍菇',method:'蒜蓉杏鲍菇',ingredients:[{name:'杏鲍菇',qty:200}],lowGI:true},
+  ],
+  reheat:[
+    {name:'西红柿',method:'西红柿炒蛋',ingredients:[{name:'西红柿',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
+    {name:'西葫芦',method:'西葫芦炒蛋',ingredients:[{name:'西葫芦',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
+    {name:'黄瓜',method:'黄瓜炒蛋',ingredients:[{name:'黄瓜',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
+    {name:'胡萝卜',method:'胡萝卜炒蛋',ingredients:[{name:'胡萝卜',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
+    {name:'土豆',method:'酸辣土豆丝',ingredients:[{name:'土豆',qty:200}]},
+    {name:'土豆',method:'土豆烧牛肉',ingredients:[{name:'土豆',qty:150},{name:'牛肉',qty:150}]},
+    {name:'土豆',method:'地三鲜',ingredients:[{name:'土豆',qty:100},{name:'茄子',qty:100},{name:'青椒',qty:50}]},
+    {name:'萝卜',method:'萝卜炒肉',ingredients:[{name:'萝卜',qty:200},{name:'猪肉',qty:80}],lowGI:true},
+    {name:'木耳',method:'木耳炒蛋',ingredients:[{name:'木耳',qty:50},{name:'鸡蛋',qty:50}]},
+    {name:'木耳',method:'木耳炒肉',ingredients:[{name:'木耳',qty:50},{name:'猪肉',qty:80}]},
+    {name:'蘑菇',method:'蘑菇炒蛋',ingredients:[{name:'蘑菇',qty:150},{name:'鸡蛋',qty:50}]},
+    {name:'金针菇',method:'金针菇炒蛋',ingredients:[{name:'金针菇',qty:150},{name:'鸡蛋',qty:50}]},
+    {name:'平菇',method:'平菇炒蛋',ingredients:[{name:'平菇',qty:200},{name:'鸡蛋',qty:50}]},
+    {name:'豆角',method:'干煸豆角',ingredients:[{name:'豆角',qty:200}]},
+    {name:'豆角',method:'豆角炒肉',ingredients:[{name:'豆角',qty:200},{name:'猪肉',qty:80}]},
+    {name:'南瓜',method:'咸蛋黄焗南瓜',ingredients:[{name:'南瓜',qty:200},{name:'鸡蛋',qty:100}]},
+    {name:'茄子',method:'红烧茄子',ingredients:[{name:'茄子',qty:200}]},
+    {name:'洋葱',method:'洋葱炒蛋',ingredients:[{name:'洋葱',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
+  ],
+};
+
+// 加载菜谱库
+let recipeDB;
+try {
+  const stored = localStorage.getItem('recipeDB');
+  recipeDB = stored ? JSON.parse(stored) : DEFAULT_RECIPES;
+} catch(e) {
+  recipeDB = DEFAULT_RECIPES;
+}
+
+function saveRecipeDB() {
+  localStorage.setItem('recipeDB', JSON.stringify(recipeDB));
+}
+
+// 菜谱库
+const meatRecipes = [
+  {name:'鸡腿肉',method:'红烧鸡腿',ingredients:['鸡腿肉']},
+  {name:'鸡腿肉',method:'黄焖鸡',ingredients:['鸡腿肉','土豆']},
+  {name:'鸡胸肉',method:'宫保鸡丁',ingredients:['鸡胸肉']},
+  {name:'鸡胸肉',method:'鸡丝拌豆腐',ingredients:['鸡胸肉','北豆腐']},
+  {name:'牛肉',method:'萝卜炖牛肉',ingredients:['牛肉','胡萝卜']},
+  {name:'牛肉',method:'洋葱炒牛肉',ingredients:['牛肉','洋葱']},
+  {name:'牛肉',method:'土豆烧牛肉',ingredients:['牛肉','土豆']},
+  {name:'猪肉',method:'红烧肉',ingredients:['猪肉']}
+];
+const leafyRecipes = [
+  {name:'菠菜',method:'蒜蓉菠菜',ingredients:['菠菜']},
+  {name:'白菜',method:'醋溜白菜',ingredients:['白菜']},
+  {name:'蒿子杆',method:'蒜蓉蒿子杆',ingredients:['蒿子杆']},
+  {name:'西兰花',method:'蒜蓉西兰花',ingredients:['西兰花']},
+  {name:'西红柿',method:'西红柿炒蛋',ingredients:['西红柿','鸡蛋']}
+];
+const reheatRecipes = [
+  {name:'西葫芦',method:'西葫芦炒蛋',ingredients:['西葫芦','鸡蛋']},
+  {name:'土豆',method:'酸辣土豆丝',ingredients:['土豆']},
+  {name:'胡萝卜',method:'胡萝卜炒蛋',ingredients:['胡萝卜','鸡蛋']},
+  {name:'白菜',method:'白菜炖豆腐',ingredients:['白菜','北豆腐']}
+];
+
+const LOW_GI_INGREDIENTS = ['白菜','菠菜','西兰花','西红柿','北豆腐','土豆','胡萝卜'];
+const DEFAULT_HUSBAND_FAV = ['白菜','香菜','辣椒','北豆腐','干豆腐','平菇'];
+
+let currentTab = 'generate';
+let weeklyRecipes = [];
+let settings = {
+  wifeWeight:56.5,wifeHeight:160,wifeTraining:['mon','thu'],
+  husbandWeight:72.5,husbandHeight:178,husbandTraining:['sat','sun'],
+  husbandDiabetes:false,husbandFav:true,husbandFavs:DEFAULT_HUSBAND_FAV.slice(),
+  childAge:11,childHeight:145,childWeight:40,childGender:'girl',childTraining:[]
+};
+
+try{const s=localStorage.getItem('recipeSettings');if(s)settings={...settings,...JSON.parse(s)}}catch(e){}
+
+// 成人BMI计算
+function calcAdultBMI(w,h){
+  const b=w/Math.pow(h/100,2);
+  return b<18.5?{v:b.toFixed(1),t:'偏瘦',c:'#FFC107'}:b<24?{v:b.toFixed(1),t:'标准',c:'#4CAF50'}:b<28?{v:b.toFixed(1),t:'偏胖',c:'#FF9800'}:{v:b.toFixed(1),t:'肥胖',c:'#f44336'};
+}
+
+// 儿童BMI计算（参考中国7-18岁儿童青少年BMI标准）
+// 简化判断：按年龄分段
+function calcChildBMI(age, weight, height, gender){
+  const bmi = weight / Math.pow(height/100, 2);
+  // 简化判断标准（实际应以国家发布标准表为准）
+  let text, color;
+  if(age<6){
+    if(bmi<14){text='偏低';color='#FFC107';}
+    else if(bmi<18){text='正常';color='#4CAF50';}
+    else if(bmi<20){text='偏高';color='#FF9800';}
+    else{text='肥胖';color='#f44336';}
+  }else if(age<10){
+    if(bmi<14.5){text='偏低';color='#FFC107';}
+    else if(bmi<18.5){text='正常';color='#4CAF50';}
+    else if(bmi<21){text='偏高';color='#FF9800';}
+    else{text='肥胖';color='#f44336';}
+  }else{
+    if(bmi<16){text='偏低';color='#FFC107';}
+    else if(bmi<23){text='正常';color='#4CAF50';}
+    else if(bmi<25){text='偏高';color='#FF9800';}
+    else{text='肥胖';color='#f44336';}
+  }
+  return {v:bmi.toFixed(1),t:text,c:color};
+}
+
+function calcProt(w,t){return Math.round(w*(t?1.2:0.8))}
+
+// 孩子蛋白需求（中国居民膳食指南参考）
+function calcChildProt(age, gender){
+  // 11岁儿童参考摄入量约55g/天
+  if(age<6)return 30;
+  if(age<10)return 45;
+  return 55;
+}
+
+function renderSettings(){
+  const wBMI=calcAdultBMI(settings.wifeWeight,settings.wifeHeight);
+  const hBMI=calcAdultBMI(settings.husbandWeight,settings.husbandHeight);
+  const cBMI=calcChildBMI(settings.childAge,settings.childWeight,settings.childHeight,settings.childGender);
+  const wR=calcProt(settings.wifeWeight,false),wT=calcProt(settings.wifeWeight,true);
+  const hR=calcProt(settings.husbandWeight,false),hT=calcProt(settings.husbandWeight,true);
+  const cP=calcChildProt(settings.childAge,settings.childGender);
+  const wt=settings.wifeTraining||[],ht=settings.husbandTraining||[],ct=settings.childTraining||[];
+  
+  document.getElementById('settingsForm').innerHTML=`
+    <div class="collapse-header" onclick="toggleCollapse('wife')">
+      <span class="collapse-title">👩 娃妈</span>
+      <span class="collapse-icon" id="wife-icon">▼</span>
+    </div>
+    <div class="collapse-content" id="wife-content">
+      <div class="form-row">
+        <div class="form-group"><label>身高(cm)</label><input type="number" id="wifeHeight" value="${settings.wifeHeight}"></div>
+        <div class="form-group"><label>体重(斤)</label><input type="number" id="wifeWeight" value="${Math.round(settings.wifeWeight*2)}"></div>
+      </div>
+      <div class="bmi-display">
+        <div class="bmi-item"><div class="bmi-value" style="color:${wBMI.c}">${wBMI.v}</div><div class="bmi-label">BMI</div></div>
+        <div class="bmi-item"><div class="bmi-value">${wBMI.t}</div><div class="bmi-label">体型</div></div>
+        <div class="bmi-item"><div class="bmi-value">${wR}g</div><div class="bmi-label">日常</div></div>
+        <div class="bmi-item"><div class="bmi-value">${wT}g</div><div class="bmi-label">训练日</div></div>
+      </div>
+      <div style="margin-top:10px"><label style="font-weight:500">训练日（可多选）</label></div>
+      <div class="training-check">
+        <label class="${wt.includes('mon')?'checked':''}" onclick="toggleTraining(this,'wife','mon')">周一</label>
+        <label class="${wt.includes('tue')?'checked':''}" onclick="toggleTraining(this,'wife','tue')">周二</label>
+        <label class="${wt.includes('wed')?'checked':''}" onclick="toggleTraining(this,'wife','wed')">周三</label>
+        <label class="${wt.includes('thu')?'checked':''}" onclick="toggleTraining(this,'wife','thu')">周四</label>
+        <label class="${wt.includes('fri')?'checked':''}" onclick="toggleTraining(this,'wife','fri')">周五</label>
+        <label class="${wt.includes('sat')?'checked':''}" onclick="toggleTraining(this,'wife','sat')">周六</label>
+        <label class="${wt.includes('sun')?'checked':''}" onclick="toggleTraining(this,'wife','sun')">周日</label>
+      </div>
+    </div>
+    
+    <div class="collapse-header" onclick="toggleCollapse('husband')">
+      <span class="collapse-title">👨 娃爸</span>
+      <span class="collapse-icon" id="husband-icon">▼</span>
+    </div>
+    <div class="collapse-content" id="husband-content">
+      <div class="form-row">
+        <div class="form-group"><label>身高(cm)</label><input type="number" id="husbandHeight" value="${settings.husbandHeight}"></div>
+        <div class="form-group"><label>体重(斤)</label><input type="number" id="husbandWeight" value="${Math.round(settings.husbandWeight*2)}"></div>
+      </div>
+      <div class="bmi-display">
+        <div class="bmi-item"><div class="bmi-value" style="color:${hBMI.c}">${hBMI.v}</div><div class="bmi-label">BMI</div></div>
+        <div class="bmi-item"><div class="bmi-value">${hBMI.t}</div><div class="bmi-label">体型</div></div>
+        <div class="bmi-item"><div class="bmi-value">${hR}g</div><div class="bmi-label">日常</div></div>
+        <div class="bmi-item"><div class="bmi-value">${hT}g</div><div class="bmi-label">训练日</div></div>
+      </div>
+      <div style="margin-top:10px"><label style="font-weight:500">训练日（可多选）</label></div>
+      <div class="training-check">
+        <label class="${ht.includes('mon')?'checked':''}" onclick="toggleTraining(this,'husband','mon')">周一</label>
+        <label class="${ht.includes('tue')?'checked':''}" onclick="toggleTraining(this,'husband','tue')">周二</label>
+        <label class="${ht.includes('wed')?'checked':''}" onclick="toggleTraining(this,'husband','wed')">周三</label>
+        <label class="${ht.includes('thu')?'checked':''}" onclick="toggleTraining(this,'husband','thu')">周四</label>
+        <label class="${ht.includes('fri')?'checked':''}" onclick="toggleTraining(this,'husband','fri')">周五</label>
+        <label class="${ht.includes('sat')?'checked':''}" onclick="toggleTraining(this,'husband','sat')">周六</label>
+        <label class="${ht.includes('sun')?'checked':''}" onclick="toggleTraining(this,'husband','sun')">周日</label>
+      </div>
+      <div class="checkbox-group" style="margin-top:12px">
+        <label class="checkbox-item" onclick="this.querySelector('input').click()">
+          <input type="checkbox" id="husbandDiabetes" ${settings.husbandDiabetes?'checked':''} onchange="saveSettings()"> 糖尿病(低GI)
+        </label>
+        <label class="checkbox-item" onclick="this.querySelector('input').click()">
+          <input type="checkbox" id="husbandFav" ${settings.husbandFav?'checked':''} onchange="saveSettings()"> 口味偏好
+        </label>
+      </div>
+      <div id="husbandFavSection" style="margin-top:12px;display:${settings.husbandFav?'block':'none'}">
+        <label style="font-weight:500">偏好食材（点击删除）</label>
+        <div class="fav-list">
+          ${(settings.husbandFavs||DEFAULT_HUSBAND_FAV).map(f=>`<span class="fav-tag">${f}<button onclick="removeHusbandFav('${f}')">×</button></span>`).join('')}
+        </div>
+        <div class="add-fav">
+          <input type="text" id="newHusbandFav" placeholder="输入食材名称" onkeypress="if(event.key==='Enter')addHusbandFav()">
+          <button onclick="addHusbandFav()">添加</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="collapse-header" onclick="toggleCollapse('child')">
+      <span class="collapse-title">👧 孩子</span>
+      <span class="collapse-icon" id="child-icon">▼</span>
+    </div>
+    <div class="collapse-content" id="child-content">
+      <div class="form-row">
+        <div class="form-group"><label>年龄(岁)</label><input type="number" id="childAge" value="${settings.childAge}"></div>
+        <div class="form-group"><label>性别</label><select id="childGender"><option value="girl" ${settings.childGender==='girl'?'selected':''}>女生</option><option value="boy" ${settings.childGender==='boy'?'selected':''}>男生</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>身高(cm)</label><input type="number" id="childHeight" value="${settings.childHeight}"></div>
+        <div class="form-group"><label>体重(斤)</label><input type="number" id="childWeight" value="${settings.childWeight*2}"></div>
+      </div>
+      <div class="bmi-display">
+        <div class="bmi-item"><div class="bmi-value" style="color:${cBMI.c}">${cBMI.v}</div><div class="bmi-label">BMI</div></div>
+        <div class="bmi-item"><div class="bmi-value">${cBMI.t}</div><div class="bmi-label">体型</div></div>
+        <div class="bmi-item"><div class="bmi-value">${cP}g</div><div class="bmi-label">每日蛋白</div></div>
+      </div>
+      <div style="margin-top:10px"><label style="font-weight:500">训练日（可多选，如体育课）</label></div>
+      <div class="training-check">
+        <label class="${ct.includes('mon')?'checked':''}" onclick="toggleTraining(this,'child','mon')">周一</label>
+        <label class="${ct.includes('tue')?'checked':''}" onclick="toggleTraining(this,'child','tue')">周二</label>
+        <label class="${ct.includes('wed')?'checked':''}" onclick="toggleTraining(this,'child','wed')">周三</label>
+        <label class="${ct.includes('thu')?'checked':''}" onclick="toggleTraining(this,'child','thu')">周四</label>
+        <label class="${ct.includes('fri')?'checked':''}" onclick="toggleTraining(this,'child','fri')">周五</label>
+        <label class="${ct.includes('sat')?'checked':''}" onclick="toggleTraining(this,'child','sat')">周六</label>
+        <label class="${ct.includes('sun')?'checked':''}" onclick="toggleTraining(this,'child','sun')">周日</label>
+      </div>
+    </div>
+    
+    <div class="collapse-header" onclick="toggleCollapse('recipes')">
+      <span class="collapse-title">🍳 菜谱维护</span>
+      <span class="collapse-icon" id="recipes-icon">▼</span>
+    </div>
+    <div class="collapse-content" id="recipes-content">
+      <div style="margin-bottom:15px">
+        <div style="margin-bottom:8px;font-weight:500">🥩 肉类（主菜） <span style="font-weight:normal;font-size:0.85em;color:#666">(${recipeDB.meat.length}道)</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${recipeDB.meat.map((r,i)=>`<span class="recipe-tag">${r.method}<i onclick="removeRecipe('meat',${i})">×</i></span>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input type="text" id="newMeatMethod" placeholder="菜名" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:4px">
+          <input type="text" id="newMeatMain" placeholder="主料" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px">
+          <button onclick="addRecipe('meat')" style="padding:6px 12px;background:var(--primary);color:white;border:none;border-radius:4px">添加</button>
+        </div>
+      </div>
+      <div style="margin-bottom:15px">
+        <div style="margin-bottom:8px;font-weight:500">🐟 海鲜 <span style="font-weight:normal;font-size:0.85em;color:#666">(${recipeDB.seafood.length}道)</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${recipeDB.seafood.map((r,i)=>`<span class="recipe-tag">${r.method}<i onclick="removeRecipe('seafood',${i})">×</i></span>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input type="text" id="newSeafoodMethod" placeholder="菜名" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:4px">
+          <input type="text" id="newSeafoodMain" placeholder="主料" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px">
+          <button onclick="addRecipe('seafood')" style="padding:6px 12px;background:var(--primary);color:white;border:none;border-radius:4px">添加</button>
+        </div>
+      </div>
+      <div style="margin-bottom:15px">
+        <div style="margin-bottom:8px;font-weight:500">🥬 绿叶蔬菜 <span style="font-weight:normal;font-size:0.85em;color:#666">(${recipeDB.leafy.length}道)</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${recipeDB.leafy.map((r,i)=>`<span class="recipe-tag">${r.method}<i onclick="removeRecipe('leafy',${i})">×</i></span>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input type="text" id="newLeafyMethod" placeholder="菜名" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:4px">
+          <input type="text" id="newLeafyMain" placeholder="主料" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px">
+          <button onclick="addRecipe('leafy')" style="padding:6px 12px;background:var(--primary);color:white;border:none;border-radius:4px">添加</button>
+        </div>
+      </div>
+      <div style="margin-bottom:15px">
+        <div style="margin-bottom:8px;font-weight:500">🍳 复热蔬菜 <span style="font-weight:normal;font-size:0.85em;color:#666">(${recipeDB.reheat.length}道)</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${recipeDB.reheat.map((r,i)=>`<span class="recipe-tag">${r.method}<i onclick="removeRecipe('reheat',${i})">×</i></span>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input type="text" id="newReheatMethod" placeholder="菜名" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:4px">
+          <input type="text" id="newReheatMain" placeholder="主料" style="width:80px;padding:6px;border:1px solid #ddd;border-radius:4px">
+          <button onclick="addRecipe('reheat')" style="padding:6px 12px;background:var(--primary);color:white;border:none;border-radius:4px">添加</button>
+        </div>
+      </div>
+      <button onclick="resetRecipes()" style="padding:8px 16px;background:#999;color:white;border:none;border-radius:6px;margin-top:10px">恢复默认菜谱</button>
+    </div>
+    
+    <div class="collapse-header" onclick="toggleCollapse('ingredients')">
+      <span class="collapse-title">🥦 食材营养库</span>
+      <span class="collapse-icon" id="ingredients-icon">▼</span>
+    </div>
+    <div class="collapse-content" id="ingredients-content">
+      <div style="margin-bottom:12px">
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${Object.entries(INGREDIENTS).map(([name,data],i)=>`<span class="recipe-tag">${name} ${data.protein}g<i onclick="removeIngredient('${name}')">×</i></span>`).join('')}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 80px 80px auto;gap:8px;margin-top:12px">
+        <input type="text" id="newIngName" placeholder="食材名称" style="padding:6px;border:1px solid #ddd;border-radius:4px">
+        <input type="number" id="newIngProtein" placeholder="蛋白" style="padding:6px;border:1px solid #ddd;border-radius:4px">
+        <select id="newIngCategory" style="padding:6px;border:1px solid #ddd;border-radius:4px">
+          <option value="meat">肉类</option>
+          <option value="seafood">海鲜</option>
+          <option value="leafy">绿叶</option>
+          <option value="vegetable">蔬菜</option>
+          <option value="egg">蛋类</option>
+          <option value="tofu">豆制品</option>
+          <option value="mushroom">蘑菇</option>
+        </select>
+        <button onclick="addIngredient()" style="padding:6px 12px;background:var(--primary);color:white;border:none;border-radius:4px">添加</button>
+      </div>
+      <button onclick="resetIngredients()" style="padding:8px 16px;background:#999;color:white;border:none;border-radius:6px;margin-top:15px">恢复默认食材</button>
+    </div>
+    
+    <div style="margin-top:20px;padding:15px;background:#e3f2fd;border-radius:8px">
+      <div style="font-weight:500;margin-bottom:10px">📤 数据同步（跨设备使用）</div>
+      <div style="font-size:0.85em;color:#666;margin-bottom:12px">在一部设备上导出数据，导入到另一部设备使用</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="exportData()" style="flex:1;padding:10px;background:var(--primary);color:white;border:none;border-radius:6px">导出数据</button>
+        <button onclick="importData()" style="flex:1;padding:10px;background:#2196F3;color:white;border:none;border-radius:6px">导入数据</button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleCollapse(id){
+  const c=document.getElementById(id+'-content');
+  const i=document.getElementById(id+'-icon');
+  c.classList.toggle('open');
+  i.textContent=c.classList.contains('open')?'▲':'▼';
+}
+
+function toggleTraining(el,person,day){
+  el.classList.toggle('checked');
+}
+
+function addHusbandFav(){
+  const input=document.getElementById('newHusbandFav');
+  const val=input.value.trim();
+  if(val && !settings.husbandFavs.includes(val)){
+    settings.husbandFavs.push(val);
+    input.value='';
+    renderSettings();
+  }
+}
+
+function removeHusbandFav(food){
+  settings.husbandFavs=settings.husbandFavs.filter(f=>f!==food);
+  renderSettings();
+}
+
+function addRecipe(category){
+  const idMap = {
+    meat: ['newMeatMethod', 'newMeatMain'],
+    seafood: ['newSeafoodMethod', 'newSeafoodMain'],
+    leafy: ['newLeafyMethod', 'newLeafyMain'],
+    reheat: ['newReheatMethod', 'newReheatMain']
+  };
+  const ids = idMap[category];
+  const methodEl = document.getElementById(ids[0]);
+  const mainEl = document.getElementById(ids[1]);
+  const method = methodEl?.value.trim();
+  const main = mainEl?.value.trim();
+  if(!method||!main){
+    alert('请输入菜名和主料');
+    return;
+  }
+  const newRecipe={name:main,method:method,ingredients:[{name:main,qty:200}]};
+  recipeDB[category].push(newRecipe);
+  saveRecipeDB();
+  renderSettings();
+  if(methodEl)methodEl.value='';
+  if(mainEl)mainEl.value='';
+}
+
+function removeRecipe(category,index){
+  if(confirm('确定删除这道菜吗？')){
+    recipeDB[category].splice(index,1);
+    saveRecipeDB();
+    renderSettings();
+  }
+}
+
+function addIngredient(){
+  const name=document.getElementById('newIngName')?.value.trim();
+  const protein=parseFloat(document.getElementById('newIngProtein')?.value);
+  const category=document.getElementById('newIngCategory')?.value;
+  if(!name||!protein){
+    alert('请输入食材名称和蛋白质含量');
+    return;
+  }
+  INGREDIENTS[name]={protein,category};
+  saveIngredientsDB();
+  renderSettings();
+  document.getElementById('newIngName').value='';
+  document.getElementById('newIngProtein').value='';
+}
+
+function removeIngredient(name){
+  if(confirm('确定删除该食材吗？')){
+    delete INGREDIENTS[name];
+    saveIngredientsDB();
+    renderSettings();
+  }
+}
+
+function resetIngredients(){
+  if(confirm('确定恢复默认食材库吗？')){
+    INGREDIENTS={
+      '菠菜':{protein:2.6,category:'leafy'},'白菜':{protein:1.5,category:'leafy'},'蒿子杆':{protein:1.9,category:'leafy'},
+      '西兰花':{protein:2.8,category:'leafy'},'西红柿':{protein:0.9,category:'vegetable'},
+      '鸡腿肉':{protein:20,category:'meat'},'鸡胸肉':{protein:23.3,category:'meat'},'牛肉':{protein:20.2,category:'meat'},
+      '猪肉':{protein:13.2,category:'meat'},'北极冰虾':{protein:18,category:'seafood'},'鸡蛋':{protein:13.3,category:'egg'},
+      '北豆腐':{protein:8.1,category:'tofu'},'干豆腐':{protein:16,category:'tofu'},'平菇':{protein:2.2,category:'mushroom'},
+      '香菜':{protein:1.8,category:'leafy'},'辣椒':{protein:1,category:'vegetable'},
+      '西葫芦':{protein:0.9},'土豆':{protein:2},'胡萝卜':{protein:1},'洋葱':{protein:1.1}
+    };
+    saveIngredientsDB();
+    renderSettings();
+    alert('已恢复默认食材库');
+  }
+}
+
+function resetRecipes(){
+  if(confirm('确定恢复默认菜谱吗？自定义的菜谱将被清除。')){
+    recipeDB=JSON.parse(JSON.stringify(DEFAULT_RECIPES));
+    saveRecipeDB();
+    renderSettings();
+    alert('已恢复默认菜谱');
+  }
+}
+
+function saveSettings(){
+  settings.wifeHeight=parseFloat(document.getElementById('wifeHeight').value)||160;
+  settings.wifeWeight=(parseFloat(document.getElementById('wifeWeight').value)||113)/2;
+  settings.husbandHeight=parseFloat(document.getElementById('husbandHeight').value)||178;
+  settings.husbandWeight=(parseFloat(document.getElementById('husbandWeight').value)||145)/2;
+  settings.childAge=parseInt(document.getElementById('childAge').value)||11;
+  settings.childHeight=parseFloat(document.getElementById('childHeight').value)||145;
+  settings.childWeight=(parseFloat(document.getElementById('childWeight').value)||80)/2;
+  settings.childGender=document.getElementById('childGender').value;
+  settings.husbandDiabetes=document.getElementById('husbandDiabetes').checked;
+  settings.husbandFav=document.getElementById('husbandFav').checked;
+  
+  settings.wifeTraining=[];
+  document.querySelectorAll('#wife-content .training-check label.checked').forEach(el=>{
+    const t=el.textContent.trim();
+    if(t==='周一')settings.wifeTraining.push('mon');
+    if(t==='周二')settings.wifeTraining.push('tue');
+    if(t==='周三')settings.wifeTraining.push('wed');
+    if(t==='周四')settings.wifeTraining.push('thu');
+    if(t==='周五')settings.wifeTraining.push('fri');
+    if(t==='周六')settings.wifeTraining.push('sat');
+    if(t==='周日')settings.wifeTraining.push('sun');
+  });
+  settings.husbandTraining=[];
+  document.querySelectorAll('#husband-content .training-check label.checked').forEach(el=>{
+    const t=el.textContent.trim();
+    if(t==='周一')settings.husbandTraining.push('mon');
+    if(t==='周二')settings.husbandTraining.push('tue');
+    if(t==='周三')settings.husbandTraining.push('wed');
+    if(t==='周四')settings.husbandTraining.push('thu');
+    if(t==='周五')settings.husbandTraining.push('fri');
+    if(t==='周六')settings.husbandTraining.push('sat');
+    if(t==='周日')settings.husbandTraining.push('sun');
+  });
+  settings.childTraining=[];
+  document.querySelectorAll('#child-content .training-check label.checked').forEach(el=>{
+    const t=el.textContent.trim();
+    if(t==='周一')settings.childTraining.push('mon');
+    if(t==='周二')settings.childTraining.push('tue');
+    if(t==='周三')settings.childTraining.push('wed');
+    if(t==='周四')settings.childTraining.push('thu');
+    if(t==='周五')settings.childTraining.push('fri');
+    if(t==='周六')settings.childTraining.push('sat');
+    if(t==='周日')settings.childTraining.push('sun');
+  });
+  
+  localStorage.setItem('recipeSettings',JSON.stringify(settings));
+  renderSettings();
+  alert('设置已保存！');
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  const targetId = 'tab-' + (tab === 'generate' ? 'gen' : tab === 'nutrition' ? 'nut' : tab === 'shopping' ? 'shop' : 'set');
+  const targetTab = document.getElementById(targetId);
+  if (targetTab) targetTab.classList.add('active');
+  
+  document.getElementById('tab-generate').style.display = tab === 'generate' ? 'block' : 'none';
+  document.getElementById('tab-nutrition').style.display = tab === 'nutrition' ? 'block' : 'none';
+  document.getElementById('tab-shopping').style.display = tab === 'shopping' ? 'block' : 'none';
+  document.getElementById('tab-settings').style.display = tab === 'settings' ? 'block' : 'none';
+  
+  if (tab === 'settings') renderSettings();
+  if (tab === 'nutrition' && weeklyRecipes.length > 0) renderNutrition();
+  if (tab === 'shopping' && weeklyRecipes.length > 0) renderShoppingList();
+}
+
+function generateRecipe(){
+  const d=document.getElementById('startDate').value?new Date(document.getElementById('startDate').value):new Date();
+  const diff=d.getDay()===0?-6:1-d.getDay();
+  d.setDate(d.getDate()+diff);
+  d.setHours(0,0,0,0);
+  weeklyRecipes=[];
+  const used={meat:{},seafood:{},leafy:{},reheat:{},husbandVeg:{}};
+  const husbandFavs=settings.husbandFavs||DEFAULT_HUSBAND_FAV;
+  const husbandPref=settings.husbandFav;
+  const husbandDiabetes=settings.husbandDiabetes;
+  
+  const meatRecipes = recipeDB.meat;
+  const seafoodRecipes = recipeDB.seafood;
+  const leafyRecipes = recipeDB.leafy;
+  const reheatRecipes = recipeDB.reheat;
+  
+  const calcProtein=(ingredients)=>{
+    return ingredients.reduce((sum,ing)=>sum+(INGREDIENTS[ing.name]?.protein||0)*ing.qty/100,0);
+  };
+  
+  const getMainIngredients=(recipe)=>{
+    return recipe.ingredients.map(ing=>ing.name);
+  };
+  
+  const hasConflict=(mainIng,leafyIng,reheatIng)=>{
+    const mainSet=new Set(mainIng);
+    for(const ing of leafyIng){
+      if(mainSet.has(ing))return true;
+    }
+    for(const ing of reheatIng){
+      if(mainSet.has(ing))return true;
+    }
+    const leafySet=new Set(leafyIng);
+    for(const ing of reheatIng){
+      if(leafySet.has(ing))return true;
+    }
+    return false;
+  };
+  
+  for(let i=0;i<7;i++){
+    const cd=new Date(d);cd.setDate(d.getDate()+i);
+    const dn=['日','一','二','三','四','五','六'][cd.getDay()];
+    const dk=['sun','mon','tue','wed','thu','fri','sat'][cd.getDay()];
+    const iw=settings.wifeTraining.includes(dk);
+    const ih=settings.husbandTraining.includes(dk);
+    const ic=settings.childTraining.includes(dk);
+    
+    const prevMeat=i>0?weeklyRecipes[i-1].dinner.mainProtein:'';
+    const prevSeafood=i>0?weeklyRecipes[i-1].dinner.mainProtein:'';
+    const prevLeafy=i>0?weeklyRecipes[i-1].dinner.leafy:'';
+    const prevReheat=i>0?weeklyRecipes[i-1].dinner.reheat:'';
+    const prevHusbandVeg=i>0?weeklyRecipes[i-1].dinner.leafySource:'';
+    
+    let prevHasEgg=false;
+    if(i>0){
+      const prev=weeklyRecipes[i-1].dinner;
+      prevHasEgg=prev.mainProtein.includes('蛋')||prev.leafy.includes('蛋')||prev.reheat.includes('蛋');
+    }
+    
+    const am=meatRecipes.filter(r=>{
+      if(r.name==='羊肉'&&(used.meat['羊肉']||0)>=1)return false;
+      if(r.method===prevMeat)return false;
+      return(used.meat[r.name]||0)<2;
+    });
+    const meat=am.length>0?am[Math.floor(Math.random()*am.length)]:meatRecipes[0];
+    used.meat[meat.name]=(used.meat[meat.name]||0)+1;
+    
+    const aseafood=seafoodRecipes.filter(r=>{
+      if(r.method===prevSeafood)return false;
+      return(used.seafood[r.name]||0)<1;
+    });
+    const useSeafood=aseafood.length>0&&Math.random()>0.7;
+    const seafood=useSeafood?aseafood[Math.floor(Math.random()*aseafood.length)]:null;
+    if(seafood)used.seafood[seafood.name]=(used.seafood[seafood.name]||0)+1;
+    
+    const mainProtein=useSeafood?seafood:meat;
+    const mainProteinName=useSeafood?seafood.name:meat.name;
+    
+    let avh=leafyRecipes.filter(r=>!r.method.includes('蛋')&&r.name!==prevHusbandVeg&&(used.husbandVeg[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋')));
+    if(husbandDiabetes){const lg=avh.filter(r=>r.lowGI);if(lg.length)avh=lg;}
+    if(husbandPref&&husbandFavs.length>0){
+      const fv=avh.filter(r=>r.ingredients.some(ing=>husbandFavs.some(fav=>ing.name.includes(fav)||fav.includes(ing.name))));
+      if(fv.length)avh=fv;
+    }
+    const husbandVeg=avh.length>0?avh[Math.floor(Math.random()*avh.length)]:leafyRecipes[0];
+    used.husbandVeg[husbandVeg.name]=(used.husbandVeg[husbandVeg.name]||0)+1;
+    
+    let al=leafyRecipes.filter(r=>r.name!==husbandVeg.name&&!r.method.includes('蛋')&&r.method!==prevLeafy&&(used.leafy[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋')));
+    if(husbandDiabetes){const lg=al.filter(r=>r.lowGI);if(lg.length)al=lg;}
+    const leafy=al.length>0?al[Math.floor(Math.random()*al.length)]:leafyRecipes[0];
+    used.leafy[leafy.name]=(used.leafy[leafy.name]||0)+1;
+    
+    let ar=reheatRecipes.filter(r=>r.name!==leafy.name&&r.name!==husbandVeg.name&&r.method!==prevReheat&&(used.reheat[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋')));
+    if(husbandDiabetes){ar=ar.filter(r=>r.name!=='土豆'&&r.name!=='南瓜');const lg=ar.filter(r=>r.lowGI);if(lg.length)ar=lg;}
+    const reheat=ar.length>0?ar[Math.floor(Math.random()*ar.length)]:reheatRecipes.filter(r=>!r.method.includes('蛋'))[Math.floor(Math.random()*reheatRecipes.filter(r=>!r.method.includes('蛋')).length)]||reheatRecipes[0];
+    used.reheat[reheat.name]=(used.reheat[reheat.name]||0)+1;
+    
+    const mainIng=getMainIngredients(mainProtein);
+    const leafyIng=getMainIngredients(leafy);
+    const reheatIng=getMainIngredients(reheat);
+    
+    if(hasConflict(mainIng,leafyIng,reheatIng)){
+      let bestReheat=reheat;
+      const available=reheatRecipes.filter(r=>{
+        const ri=getMainIngredients(r);
+        return r.name!==leafy.name&&r.name!==husbandVeg.name&&r.method!==prevReheat&&(used.reheat[r.name]||0)<2&&!hasConflict(mainIng,leafyIng,ri);
+      });
+      if(available.length>0){
+        used.reheat[reheat.name]=(used.reheat[reheat.name]||0)-1;
+        bestReheat=available[Math.floor(Math.random()*available.length)];
+        used.reheat[bestReheat.name]=(used.reheat[bestReheat.name]||0)+1;
+      }
+      Object.assign(reheat,bestReheat);
+    }
+    
+    const wifeWeightKg=settings.wifeWeight||56.5;
+    const husbandWeightKg=settings.husbandWeight||72.5;
+    const childWeightKg=settings.childWeight||40;
+    const wifeTotal=iw?Math.round(wifeWeightKg*1.2):Math.round(wifeWeightKg*0.7);
+    const husbandTotal=ih?Math.round(husbandWeightKg*1.2):Math.round(husbandWeightKg*0.7);
+    const childTotal=ic?Math.round(childWeightKg*1.2):Math.round(childWeightKg*0.8);
+    
+    const mainIngredients=mainProtein.ingredients;
+    const leafyIngredients=leafy.ingredients;
+    const reheatIngredients=reheat.ingredients;
+    const mp=calcProtein(mainIngredients);
+    const lp=calcProtein(leafyIngredients);
+    const rp=calcProtein(reheatIngredients);
+    
+    const shrimpCountSoFar=weeklyRecipes.slice(0,i).filter(d=>d.dinner.shrimp&&d.dinner.shrimp.includes('北极冰虾')).length;
+    const useShrimp=iw&&shrimpCountSoFar<2&&Math.random()>0.3;
+    const sp=useShrimp?18:0;
+    const totalDinnerProtein=mp+lp+rp+sp;
+    
+    const myDinner=totalDinnerProtein*0.4;
+    const husbandDinner=totalDinnerProtein*0.35;
+    const childDinner=totalDinnerProtein*0.25;
+    
+    const wifeBreakfast=15,husbandBreakfast=22,childBreakfast=15;
+    const wifeLunch=Math.max(15,wifeTotal-wifeBreakfast-Math.round(myDinner));
+    const husbandLunch=Math.max(15,husbandTotal-husbandBreakfast-Math.round(husbandDinner));
+    const childLunch=Math.max(15,childTotal-childBreakfast-Math.round(childDinner));
+    
+    weeklyRecipes.push({
+      date:cd,dayName:dn,dayKey:dk,
+      isWifeTraining:iw,isHusbandTraining:ih,isChildTraining:ic,
+      dinner:{
+        mainProtein:useSeafood?seafood.method:meat.method,
+        mainProteinName:mainProteinName,
+        mainProteinSource:useSeafood?'🐟':'🥩',
+        mainProteinGrams:Math.round(mp),
+        leafy:leafy.method,
+        leafySource:leafy.name,
+        leafyProteinGrams:Math.round(lp),
+        reheat:reheat.method,
+        reheatProtein:Math.round(rp),
+        shrimp:useShrimp?'北极冰虾 100g（娃妈专属）':null,
+        shrimpProtein:sp,
+        totalProtein:Math.round(totalDinnerProtein),
+        mainIngredients:mainIngredients,
+        leafyIngredients:leafyIngredients,
+        reheatIngredients:reheatIngredients,
+        wifeLunch:Math.round(wifeLunch),
+        husbandLunch:Math.round(husbandLunch),
+        childLunch:Math.round(childLunch),
+        myDinner:Math.round(myDinner),
+        husbandDinner:Math.round(husbandDinner),
+        childDinner:Math.round(childDinner),
+        wifeTotalIntake:wifeBreakfast+Math.round(wifeLunch)+Math.round(myDinner),
+        husbandTotalIntake:husbandBreakfast+Math.round(husbandLunch)+Math.round(husbandDinner),
+        childTotalIntake:childBreakfast+Math.round(childLunch)+Math.round(childDinner),
+        wifeProteinNeed:wifeTotal,
+        husbandProteinNeed:husbandTotal,
+        childProteinNeed:childTotal,
+        wifeMet:wifeBreakfast+wifeLunch+myDinner>=wifeTotal,
+        husbandMet:husbandBreakfast+husbandLunch+husbandDinner>=husbandTotal,
+        childMet:childBreakfast+childLunch+childDinner>=childTotal,
+      },
+      lunch:{meat:mainProteinName,method:mainProtein.method,veg:reheat.method}
+    });
+  }
+  renderRecipe();renderShoppingList();renderNutrition();
+}
+
+function renderRecipe(){
+  let html='';
+  weeklyRecipes.forEach(day=>{
+    const ds=`${day.date.getMonth()+1}月${day.date.getDate()}日`;
+    const wb=day.isWifeTraining?'<span class="training-badge">娃妈训练日</span>':'';
+    const hb=day.isHusbandTraining?'<span class="training-badge">娃爸训练日</span>':'';
+    const cb=day.isChildTraining?'<span class="training-badge">孩子训练日</span>':'';
+    html+=`<div class="recipe-day">
+      <div class="day-title">📅 ${ds} 周${day.dayName} ${wb} ${hb} ${cb}</div>
+      
+      <div class="meal-section">
+        <div class="meal-title">🥩 娃爸午餐（打包）</div>
+        <div class="recipe-item">
+          <span class="name">${day.lunch.method} + ${day.lunch.veg}</span>
+          <span class="nutri">高蛋白</span>
+        </div>
+      </div>
+      
+      <div class="meal-section">
+        <div class="meal-title">🥗 午餐蛋白建议</div>
+        <div class="recipe-item">
+          <span class="name">👩 娃妈${day.isWifeTraining?'(训练日)':''}：${day.dinner.wifeLunch}g</span>
+          <span class="nutri">${day.isWifeTraining?'训练日':'日常'}建议</span>
+        </div>
+        <div class="recipe-item">
+          <span class="name">👨 娃爸${day.isHusbandTraining?'(训练日)':''}：${day.dinner.husbandLunch}g</span>
+          <span class="nutri">${day.isHusbandTraining?'训练日':'日常'}建议</span>
+        </div>
+        <div class="recipe-item">
+          <span class="name">👧 孩子${day.isChildTraining?'(训练日)':''}：${day.dinner.childLunch}g</span>
+          <span class="nutri">${day.isChildTraining?'训练日':'日常'}建议</span>
+        </div>
+      </div>
+      
+      <div class="meal-section">
+        <div class="meal-title">🍽️ 晚餐</div>
+        <div class="recipe-item">
+          <span class="name">${day.dinner.mainProteinSource} ${day.dinner.mainProtein} <span class="husband-fav">⭐娃爸爱</span></span>
+          <span class="protein">蛋白 +${day.dinner.mainProteinGrams}g</span>
+        </div>
+        <div class="recipe-item">
+          <span class="name">🍳 ${day.dinner.reheat} <span class="husband-fav">可复热</span></span>
+          <span class="protein">蛋白 +${day.dinner.reheatProtein}g</span>
+        </div>
+        <div class="recipe-item">
+          <span class="name">🥬 ${day.dinner.leafy}</span>
+          <span class="protein">蛋白 +${day.dinner.leafyProteinGrams}g</span>
+        </div>
+        ${day.dinner.shrimp&&day.wifeTraining?`
+        <div class="recipe-item">
+          <span class="name">🦐 ${day.dinner.shrimp}</span>
+          <span class="protein">蛋白 +${day.dinner.shrimpProtein}g</span>
+        </div>`:''}
+      </div>
+      
+      <div style="margin-top:10px;padding:10px;background:#f5f5f5;border-radius:8px;font-size:0.85em">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
+          <div>👩 娃妈：${day.dinner.wifeTotalIntake}g / ${day.dinner.wifeProteinNeed}g ${day.dinner.wifeMet?'✅':'❌'}</div>
+          <div>👨 娃爸：${day.dinner.husbandTotalIntake}g / ${day.dinner.husbandProteinNeed}g ${day.dinner.husbandMet?'✅':'❌'}</div>
+          <div>👧 孩子：${day.dinner.childTotalIntake}g / ${day.dinner.childProteinNeed}g ${day.dinner.childMet?'✅':'❌'}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('recipeResult').innerHTML=html;
+  
+  const recipeStats={};
+  weeklyRecipes.forEach(day=>{
+    const mainDish=day.dinner.mainProtein;
+    if(!recipeStats[mainDish])recipeStats[mainDish]={count:0,days:[]};
+    recipeStats[mainDish].count++;
+    recipeStats[mainDish].days.push(day.dayName);
+    const leafyDish=day.dinner.leafy;
+    if(!recipeStats[leafyDish])recipeStats[leafyDish]={count:0,days:[]};
+    recipeStats[leafyDish].count++;
+    recipeStats[leafyDish].days.push(day.dayName);
+    const reheatDish=day.dinner.reheat;
+    if(!recipeStats[reheatDish])recipeStats[reheatDish]={count:0,days:[]};
+    recipeStats[reheatDish].count++;
+    recipeStats[reheatDish].days.push(day.dayName);
+  });
+  
+  let statsHtml='<div style="margin-top:20px;padding:16px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1)"><h3>📊 本周菜品频次统计</h3>';
+  let statsTable='<table style="width:100%;border-collapse:collapse;font-size:0.9em"><tr style="background:#f5f5f5"><th style="padding:8px;text-align:left">菜品</th><th style="padding:8px;text-align:center">次数</th><th style="padding:8px;text-align:left">出现日期</th></tr>';
+  Object.entries(recipeStats).sort((a,b)=>b[1].count-a[1].count).forEach(([name,data],idx)=>{
+    statsTable+=`<tr style="background:${idx%2===0?'#fff':'#f9f9f9'}"><td style="padding:8px">${name}</td><td style="padding:8px;text-align:center;font-weight:bold">${data.count}</td><td style="padding:8px">${data.days.join('、')}</td></tr>`;
+  });
+  statsTable+='</table>';
+  document.getElementById('recipeStats').innerHTML=statsHtml+statsTable+'</div>';
+}
+
+function renderShoppingList(){
+  let html='';
+  weeklyRecipes.forEach(day=>{
+    const ds=`${day.date.getMonth()+1}月${day.date.getDate()}日`;
+    const dn=day.dayName;
+    const items={};
+    day.dinner.mainIngredients.forEach(i=>items[i.name]=(items[i.name]||0)+i.qty);
+    day.dinner.leafyIngredients.forEach(i=>items[i.name]=(items[i.name]||0)+i.qty);
+    day.dinner.reheatIngredients.forEach(i=>items[i.name]=(items[i.name]||0)+i.qty);
+    if(day.dinner.shrimp)items['北极冰虾']=(items['北极冰虾']||0)+100;
+    const cats={meat:[],veg:[],prot:[]};
+    for(const[n,q]of Object.entries(items)){
+      const c=INGREDIENTS[n]?.category;
+      if(c==='meat'||c==='seafood')cats.meat.push({n,q});
+      else if(c==='egg'||c==='tofu')cats.prot.push({n,q});
+      else cats.veg.push({n,q});
+    }
+    html+=`<div class="shopping-category"><h3>📅 ${ds} 周${dn}</h3>`;
+    if(cats.meat.length){cats.meat.forEach(i=>html+=`<div class="shopping-item"><span>${i.n}</span><span>${i.q}g</span></div>`);}
+    if(cats.veg.length){cats.veg.forEach(i=>html+=`<div class="shopping-item"><span>${i.n}</span><span>${i.q}g</span></div>`);}
+    if(cats.prot.length){cats.prot.forEach(i=>html+=`<div class="shopping-item"><span>${i.n}</span><span>${i.q}g</span></div>`);}
+    html+='</div>';
+  });
+  document.getElementById('shoppingList').innerHTML=html;
+}
+
+function renderNutrition(){
+  const container=document.getElementById('nutritionResult');
+  if(!container)return;
+  
+  const dailyBreakfast={protein:43,calorie:400};
+  
+  let dinnerProtein=0;
+  let dinnerCalorie=0;
+  let lunchProtein=0;
+  let trainingDays=0;
+  
+  weeklyRecipes.forEach(day=>{
+    dinnerProtein+=day.dinner.totalProtein;
+    dinnerCalorie+=900;
+    lunchProtein+=(day.dinner.wifeLunch+day.dinner.husbandLunch+day.dinner.childLunch);
+    if(day.isHusbandTraining||day.isWifeTraining)trainingDays++;
+  });
+  
+  const weeklyProtein=dailyBreakfast.protein*7+lunchProtein+dinnerProtein;
+  const weeklyCalorie=dailyBreakfast.calorie*7+lunchProtein*5+dinnerCalorie;
+  
+  const avgDaily={
+    family:{protein:Math.round(weeklyProtein/7),calorie:Math.round(weeklyCalorie/7)},
+    perPerson:{protein:Math.round(weeklyProtein/7/3),calorie:Math.round(weeklyCalorie/7/3)}
+  };
+  
+  const wifeWeightKg=settings.wifeWeight||56.5;
+  const husbandWeightKg=settings.husbandWeight||72.5;
+  const wifeProteinRest=Math.round(wifeWeightKg*0.7);
+  const wifeProteinTrain=Math.round(wifeWeightKg*1.2);
+  const husbandProteinRest=Math.round(husbandWeightKg*0.7);
+  const husbandProteinTrain=Math.round(husbandWeightKg*1.2);
+  
+  container.innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+      <div style="background:#e8f5e9;padding:16px;border-radius:8px;text-align:center">
+        <div style="font-size:0.8em;color:#2E7D32;margin-bottom:4px">早餐（固定）</div>
+        <div style="font-size:1.3em;font-weight:700;color:#2E7D32">${dailyBreakfast.protein}g</div>
+        <div style="font-size:0.75em;color:#666">娃妈15g · 娃爸18g · 孩子10g</div>
+      </div>
+      <div style="background:#e3f2fd;padding:16px;border-radius:8px;text-align:center">
+        <div style="font-size:0.8em;color:#1565C0;margin-bottom:4px">午餐建议</div>
+        <div style="font-size:1.3em;font-weight:700;color:#1565C0">${Math.round(lunchProtein/7)}g</div>
+        <div style="font-size:0.75em;color:#666">日均全家</div>
+      </div>
+      <div style="background:#fce4ec;padding:16px;border-radius:8px;text-align:center">
+        <div style="font-size:0.8em;color:#C2185B;margin-bottom:4px">晚餐（生成）</div>
+        <div style="font-size:1.3em;font-weight:700;color:#C2185B">${Math.round(dinnerProtein/7)}g</div>
+        <div style="font-size:0.75em;color:#666">日均全家</div>
+      </div>
+    </div>
+    
+    <div class="nutrition-stat" style="background:#f8f9fa">
+      <div class="nutrition-item">
+        <div class="value" style="color:#4CAF50">${avgDaily.family.protein}g</div>
+        <div class="label">全家日均蛋白</div>
+      </div>
+      <div class="nutrition-item">
+        <div class="value" style="color:#4CAF50">${avgDaily.family.calorie}</div>
+        <div class="label">全家日均热量</div>
+      </div>
+      <div class="nutrition-item">
+        <div class="value">${trainingDays}天</div>
+        <div class="label">训练日</div>
+      </div>
+    </div>
+    
+    <div style="margin-top:16px">
+      <div style="font-size:0.9em;color:var(--text-light);margin-bottom:12px">📊 人均日均（全家÷3）vs 推荐值</div>
+      <div class="nutrition-stat" style="background:#fff3e0">
+        <div class="nutrition-item">
+          <div class="value" style="color:#E91E63">${avgDaily.perPerson.protein}g</div>
+          <div class="label">人均蛋白</div>
+        </div>
+        <div class="nutrition-item">
+          <div class="value" style="color:#E91E63">${avgDaily.perPerson.calorie}</div>
+          <div class="label">人均热量</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="margin-top:16px;padding:12px;background:#f8f9fa;border-radius:8px">
+      <div style="font-size:0.85em;color:#666;margin-bottom:10px">📋 营养学推荐（基于当前设置）</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="padding:10px;background:#e3f2fd;border-radius:6px">
+          <div style="font-weight:600;color:#1565C0;margin-bottom:4px">👩👨 成人推荐</div>
+          <div style="font-size:0.85em;color:#666">热量: 1600-1800 kcal</div>
+          <div style="font-size:0.85em;color:#666">蛋白: ${wifeProteinRest}-${wifeProteinTrain}g</div>
+        </div>
+        <div style="padding:10px;background:#fff3e0;border-radius:6px">
+          <div style="font-weight:600;color:#E65100;margin-bottom:4px">👧 孩子推荐（${settings.childAge||11}岁）</div>
+          <div style="font-size:0.85em;color:#666">热量: 1800-2000 kcal</div>
+          <div style="font-size:0.85em;color:#666">蛋白: 50-60g</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="alert ${avgDaily.perPerson.protein>=50?'alert-success':'alert-warning'}" style="margin-top:16px">
+      ${avgDaily.perPerson.protein>=50?'✓ 人均蛋白摄入达标':'⚠ 人均蛋白略低，建议增加肉蛋类'}
+    </div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{const t=new Date();const d=t.getDay()===0?6:t.getDay()-1;const m=new Date(t);m.setDate(t.getDate()-d);document.getElementById('startDate').value=m.toISOString().split('T')[0]});
+</script>
+</body>
+</html>
