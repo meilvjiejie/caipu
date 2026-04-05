@@ -248,7 +248,6 @@ const DEFAULT_RECIPES = {
     {name:'木耳',method:'木耳炒蛋',ingredients:[{name:'木耳',qty:50},{name:'鸡蛋',qty:50}]},
     {name:'木耳',method:'木耳炒肉',ingredients:[{name:'木耳',qty:50},{name:'猪肉',qty:80}]},
     {name:'蘑菇',method:'蘑菇炒蛋',ingredients:[{name:'蘑菇',qty:150},{name:'鸡蛋',qty:50}]},
-    {name:'金针菇',method:'金针菇炒蛋',ingredients:[{name:'金针菇',qty:150},{name:'鸡蛋',qty:50}]},
     {name:'平菇',method:'平菇炒蛋',ingredients:[{name:'平菇',qty:200},{name:'鸡蛋',qty:50}]},
     {name:'豆角',method:'干煸豆角',ingredients:[{name:'豆角',qty:200}]},
     {name:'豆角',method:'豆角炒肉',ingredients:[{name:'豆角',qty:200},{name:'猪肉',qty:80}]},
@@ -808,7 +807,14 @@ function generateRecipe(){
     const mainProteinName=useSeafood?seafood.name:meat.name;
     
     let avh=leafyRecipes.filter(r=>!r.method.includes('蛋')&&r.name!==prevHusbandVeg&&(used.husbandVeg[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋')));
-    if(husbandDiabetes){const lg=avh.filter(r=>r.lowGI);if(lg.length)avh=lg;}
+    if(husbandDiabetes){
+      avh=avh.filter(r=>{
+        const ingNames=r.ingredients.map(i=>i.name);
+        return !ingNames.includes('土豆') && !ingNames.includes('南瓜');
+      });
+      const lg=avh.filter(r=>r.lowGI);
+      if(lg.length)avh=lg;
+    }
     if(husbandPref&&husbandFavs.length>0){
       const fv=avh.filter(r=>r.ingredients.some(ing=>husbandFavs.some(fav=>ing.name.includes(fav)||fav.includes(ing.name))));
       if(fv.length)avh=fv;
@@ -822,8 +828,16 @@ function generateRecipe(){
     used.leafy[leafy.name]=(used.leafy[leafy.name]||0)+1;
     
     let ar=reheatRecipes.filter(r=>r.name!==leafy.name&&r.name!==husbandVeg.name&&r.method!==prevReheat&&(used.reheat[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋')));
-    if(husbandDiabetes){ar=ar.filter(r=>r.name!=='土豆'&&r.name!=='南瓜');const lg=ar.filter(r=>r.lowGI);if(lg.length)ar=lg;}
-    const reheat=ar.length>0?ar[Math.floor(Math.random()*ar.length)]:reheatRecipes.filter(r=>!r.method.includes('蛋'))[Math.floor(Math.random()*reheatRecipes.filter(r=>!r.method.includes('蛋')).length)]||reheatRecipes[0];
+    if(husbandDiabetes){
+      ar=ar.filter(r=>{
+        const ingNames=r.ingredients.map(i=>i.name);
+        return !ingNames.includes('土豆') && !ingNames.includes('南瓜');
+      });
+      const lg=ar.filter(r=>r.lowGI);
+      if(lg.length)ar=lg;
+    }
+    const noEggReheat=reheatRecipes.filter(r=>!r.method.includes('蛋'));
+    const reheat=ar.length>0?ar[Math.floor(Math.random()*ar.length)]:noEggReheat[Math.floor(Math.random()*noEggReheat.length)]||reheatRecipes[0];
     used.reheat[reheat.name]=(used.reheat[reheat.name]||0)+1;
     
     const mainIng=getMainIngredients(mainProtein);
