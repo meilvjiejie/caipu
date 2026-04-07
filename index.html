@@ -113,13 +113,41 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg)
 <script>
 // 食材数据库
 let INGREDIENTS = {
-  '菠菜':{protein:2.6,category:'leafy'},'白菜':{protein:1.5,category:'leafy'},'蒿子杆':{protein:1.9,category:'leafy'},
-  '西兰花':{protein:2.8,category:'leafy'},'西红柿':{protein:0.9,category:'vegetable'},
-  '鸡腿肉':{protein:20,category:'meat'},'鸡胸肉':{protein:23.3,category:'meat'},'牛肉':{protein:20.2,category:'meat'},
-  '猪肉':{protein:13.2,category:'meat'},'北极冰虾':{protein:18,category:'seafood'},'鸡蛋':{protein:13.3,category:'egg'},
-  '北豆腐':{protein:8.1,category:'tofu'},'干豆腐':{protein:16,category:'tofu'},'平菇':{protein:2.2,category:'mushroom'},
-  '香菜':{protein:1.8,category:'leafy'},'辣椒':{protein:1,category:'vegetable'},
-  '西葫芦':{protein:0.9},'土豆':{protein:2},'胡萝卜':{protein:1},'洋葱':{protein:1.1}
+  '菠菜':{protein:2.6,category:'leafy'},
+  '白菜':{protein:1.5,category:'leafy'},
+  '蒿子杆':{protein:1.9,category:'leafy'},
+  '西兰花':{protein:2.8,category:'leafy'},
+  '西红柿':{protein:0.9,category:'vegetable'},
+  '鸡腿肉':{protein:20,category:'meat'},
+  '鸡胸肉':{protein:23.3,category:'meat'},
+  '牛肉':{protein:20.2,category:'meat'},
+  '猪肉':{protein:13.2,category:'meat'},
+  '北极冰虾':{protein:18,category:'seafood'},
+  '鸡蛋':{protein:13.3,category:'egg'},
+  '北豆腐':{protein:8.1,category:'tofu'},
+  '干豆腐':{protein:12,category:'tofu'},
+  '平菇':{protein:2.2,category:'mushroom'},
+  '香菜':{protein:1.8,category:'leafy'},
+  '辣椒':{protein:1,category:'vegetable'},
+  '西葫芦':{protein:0.9,category:''},
+  '土豆':{protein:2,category:''},
+  '胡萝卜':{protein:1,category:''},
+  '洋葱':{protein:1.1,category:''},
+  '鸡翅':{protein:17.4,category:'meat'},
+  '鸡翅根':{protein:17.4,category:'meat'},
+  '豆干':{protein:24,category:'tofu'},
+  '豆腐':{protein:8.1,category:'tofu'},
+  '肉':{protein:13.2,category:'meat'},
+  '大黄花':{protein:17.7,category:'seafood'},
+  '昂刺鱼':{protein:16.1,category:'seafood'},
+  '虾':{protein:17,category:'seafood'},
+  '排骨':{protein:18.9,category:'meat'},
+  '虾仁':{protein:17,category:'seafood'},
+  '鲈鱼':{protein:18.5,category:'seafood'},
+  '鲳鱼':{protein:16.8,category:'meat'},
+  '牛肉丝':{protein:20.2,category:'meat'},
+  '鳕鱼':{protein:21,category:'seafood'},
+  '牛排':{protein:21.6,category:'meat'},
 };
 
 // 加载食材数据
@@ -200,8 +228,16 @@ const DEFAULT_RECIPES = {
     {name:'猪肉',method:'糖醋里脊',ingredients:[{name:'猪肉',qty:200}]},
     {name:'猪肉',method:'回锅肉',ingredients:[{name:'猪肉',qty:200},{name:'青椒',qty:50}]},
     {name:'猪肉',method:'鱼香肉丝',ingredients:[{name:'猪肉',qty:200},{name:'木耳',qty:30}]},
-    {name:'大虾',method:'油焖大虾',ingredients:[{name:'大虾',qty:200}]},
     {name:'大虾',method:'虾仁滑蛋',ingredients:[{name:'大虾',qty:150},{name:'鸡蛋',qty:50}]},
+    {name:'牛肉，香菜',method:'香菜炒牛肉',ingredients:[{name:'牛肉，香菜',qty:200}]},
+    {name:'酸菜，排骨',method:'酸菜炖排骨',ingredients:[{name:'酸菜，排骨',qty:200}]},
+    {name:'豆角，排骨',method:'豆角炖排骨',ingredients:[{name:'豆角，排骨',qty:200}]},
+    {name:'鸡脆骨',method:'奥尔良鸡脆骨',ingredients:[{name:'鸡脆骨',qty:200}]},
+    {name:'鸡翅',method:'奥尔良鸡翅',ingredients:[{name:'鸡翅',qty:200}]},
+    {name:'鸡翅',method:'可乐鸡翅',ingredients:[{name:'鸡翅',qty:200}]},
+    {name:'牛排',method:'煎牛排',ingredients:[{name:'牛排',qty:200}]},
+    {name:'牛肉丝，芹菜',method:'芹菜炒牛肉丝',ingredients:[{name:'牛肉丝，芹菜',qty:200}]},
+    {name:'奥尔良鸡翅根',method:'奥尔良鸡翅根',ingredients:[{name:'奥尔良鸡翅根',qty:200}]},
   ],
   seafood:[
     {name:'鲈鱼',method:'清蒸鲈鱼',ingredients:[{name:'鲈鱼',qty:200}]},
@@ -212,48 +248,53 @@ const DEFAULT_RECIPES = {
     {name:'鲳鱼',method:'清蒸鲳鱼',ingredients:[{name:'鲳鱼',qty:200}]},
     {name:'扇贝',method:'蒜蓉粉丝蒸扇贝',ingredients:[{name:'扇贝',qty:200},{name:'粉丝',qty:30}]},
     {name:'蛤蜊',method:'蛤蜊蒸蛋',ingredients:[{name:'蛤蜊',qty:150},{name:'鸡蛋',qty:50}]},
+    {name:'昂刺鱼，豆腐',method:'昂刺鱼炖豆腐',ingredients:[{name:'昂刺鱼，豆腐',qty:200}]},
+    {name:'虾',method:'白灼虾',ingredients:[{name:'虾',qty:200}]},
+    {name:'黄花鱼',method:'红烧大黄花',ingredients:[{name:'黄花鱼',qty:200}]},
+    {name:'虾',method:'油焖大虾',ingredients:[{name:'虾',qty:200}]},
   ],
   leafy:[
     {name:'菠菜',method:'蒜蓉菠菜',ingredients:[{name:'菠菜',qty:200}],lowGI:true},
     {name:'菠菜',method:'菠菜蛋花汤',ingredients:[{name:'菠菜',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
     {name:'生菜',method:'蒜蓉生菜',ingredients:[{name:'生菜',qty:200}],lowGI:true},
     {name:'西兰花',method:'蒜蓉西兰花',ingredients:[{name:'西兰花',qty:200}],lowGI:true},
-    {name:'西兰花',method:'西兰花炒虾',ingredients:[{name:'西兰花',qty:200},{name:'大虾',qty:80}],lowGI:true},
     {name:'白菜',method:'醋溜白菜',ingredients:[{name:'白菜',qty:200}],lowGI:true},
-    {name:'白菜',method:'白菜炖豆腐',ingredients:[{name:'白菜',qty:200},{name:'北豆腐',qty:100}],lowGI:true},
     {name:'白菜',method:'乾隆白菜',ingredients:[{name:'白菜',qty:200}],lowGI:true},
     {name:'白菜',method:'白菜炒肉',ingredients:[{name:'白菜',qty:200},{name:'猪肉',qty:80}],lowGI:true},
     {name:'香菜',method:'香菜拌豆皮',ingredients:[{name:'香菜',qty:150},{name:'干豆腐',qty:100}],lowGI:true},
     {name:'辣椒',method:'虎皮青椒',ingredients:[{name:'辣椒',qty:200}],lowGI:true},
-    {name:'辣椒',method:'辣椒炒蛋',ingredients:[{name:'辣椒',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
-    {name:'青椒',method:'青椒炒肉',ingredients:[{name:'青椒',qty:200},{name:'猪肉',qty:80}],lowGI:true},
-    {name:'北豆腐',method:'家常豆腐',ingredients:[{name:'北豆腐',qty:200}],lowGI:true},
     {name:'北豆腐',method:'肉末豆腐',ingredients:[{name:'北豆腐',qty:200},{name:'猪肉',qty:50}],lowGI:true},
-    {name:'干豆腐',method:'尖椒干豆腐',ingredients:[{name:'干豆腐',qty:150},{name:'辣椒',qty:100}],lowGI:true},
-    {name:'平菇',method:'平菇炒蛋',ingredients:[{name:'平菇',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
-    {name:'平菇',method:'蒜蓉平菇',ingredients:[{name:'平菇',qty:200}],lowGI:true},
     {name:'香菇',method:'香菇炒油菜',ingredients:[{name:'香菇',qty:100},{name:'油菜',qty:150}],lowGI:true},
-    {name:'金针菇',method:'蒜蓉金针菇',ingredients:[{name:'金针菇',qty:200}],lowGI:true},
     {name:'杏鲍菇',method:'蒜蓉杏鲍菇',ingredients:[{name:'杏鲍菇',qty:200}],lowGI:true},
+    {name:'黄瓜花',method:'清炒黄瓜花',ingredients:[{name:'黄瓜花',qty:200}]},
+    {name:'蒿子秆',method:'蒜蓉蒿子秆',ingredients:[{name:'蒿子秆',qty:200}]},
+    {name:'小油菜，香菇',method:'香菇小油菜',ingredients:[{name:'小油菜，香菇',qty:200}]},
+    {name:'茼蒿，豆腐',method:'茼蒿拌豆腐',ingredients:[{name:'茼蒿，豆腐',qty:200}]},
+    {name:'藕',method:'炝拌藕丁',ingredients:[{name:'藕',qty:200}]},
   ],
   reheat:[
     {name:'西红柿',method:'西红柿炒蛋',ingredients:[{name:'西红柿',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
     {name:'西葫芦',method:'西葫芦炒蛋',ingredients:[{name:'西葫芦',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
     {name:'黄瓜',method:'黄瓜炒蛋',ingredients:[{name:'黄瓜',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
-    {name:'胡萝卜',method:'胡萝卜炒蛋',ingredients:[{name:'胡萝卜',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
     {name:'土豆',method:'酸辣土豆丝',ingredients:[{name:'土豆',qty:200}]},
-    {name:'土豆',method:'土豆烧牛肉',ingredients:[{name:'土豆',qty:150},{name:'牛肉',qty:150}]},
     {name:'土豆',method:'地三鲜',ingredients:[{name:'土豆',qty:100},{name:'茄子',qty:100},{name:'青椒',qty:50}]},
     {name:'萝卜',method:'萝卜炒肉',ingredients:[{name:'萝卜',qty:200},{name:'猪肉',qty:80}],lowGI:true},
     {name:'木耳',method:'木耳炒蛋',ingredients:[{name:'木耳',qty:50},{name:'鸡蛋',qty:50}]},
     {name:'木耳',method:'木耳炒肉',ingredients:[{name:'木耳',qty:50},{name:'猪肉',qty:80}]},
-    {name:'蘑菇',method:'蘑菇炒蛋',ingredients:[{name:'蘑菇',qty:150},{name:'鸡蛋',qty:50}]},
-    {name:'平菇',method:'平菇炒蛋',ingredients:[{name:'平菇',qty:200},{name:'鸡蛋',qty:50}]},
     {name:'豆角',method:'干煸豆角',ingredients:[{name:'豆角',qty:200}]},
-    {name:'豆角',method:'豆角炒肉',ingredients:[{name:'豆角',qty:200},{name:'猪肉',qty:80}]},
-    {name:'南瓜',method:'咸蛋黄焗南瓜',ingredients:[{name:'南瓜',qty:200},{name:'鸡蛋',qty:100}]},
     {name:'茄子',method:'红烧茄子',ingredients:[{name:'茄子',qty:200}]},
     {name:'洋葱',method:'洋葱炒蛋',ingredients:[{name:'洋葱',qty:200},{name:'鸡蛋',qty:50}],lowGI:true},
+    {name:'鸡蛋，尖椒',method:'尖椒炒鸡蛋',ingredients:[{name:'鸡蛋，尖椒',qty:200}]},
+    {name:'西芹，虾仁',method:'西芹炒虾仁',ingredients:[{name:'西芹，虾仁',qty:200}]},
+    {name:'豆腐',method:'家常豆腐',ingredients:[{name:'豆腐',qty:200}]},
+    {name:'西兰花，虾仁',method:'虾仁西兰花',ingredients:[{name:'西兰花，虾仁',qty:200}]},
+    {name:'螺丝椒，干豆腐',method:'尖椒干豆腐',ingredients:[{name:'螺丝椒，干豆腐',qty:200}]},
+    {name:'白菜，豆腐',method:'白菜炖豆腐',ingredients:[{name:'白菜，豆腐',qty:200}]},
+    {name:'菠菜，鸡蛋',method:'菠菜炒鸡蛋',ingredients:[{name:'菠菜，鸡蛋',qty:200}]},
+    {name:'黄豆芽',method:'醋烹黄豆芽',ingredients:[{name:'黄豆芽',qty:200}]},
+    {name:'茄子，螺丝椒',method:'尖椒炒茄丝',ingredients:[{name:'茄子，螺丝椒',qty:200}]},
+    {name:'菜花，肉',method:'菜花炒肉',ingredients:[{name:'菜花，肉',qty:200}]},
+    {name:'豆腐',method:'油泼豆腐',ingredients:[{name:'豆腐',qty:200}]},
   ],
 };
 
@@ -467,6 +508,11 @@ function renderSettings(){
       <span class="collapse-icon" id="recipes-icon">▼</span>
     </div>
     <div class="collapse-content" id="recipes-content">
+      <div style="margin-bottom:12px">
+        <div style="font-size:0.85em;color:#666;margin-bottom:6px">批量添加菜谱（格式：菜名,主料,分类），分类：meat=肉类主菜, seafood=海鲜, leafy=绿叶, reheat=复热</div>
+        <textarea id="newRecipeBatch" placeholder="糖醋排骨,排骨,meat&#xaquo;清蒸鲈鱼,鲈鱼,seafood&#xaquo;蒜蓉菠菜,菠菜,leafy" style="width:100%;height:60px;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.9em"></textarea>
+        <button onclick="addRecipeBatch()" style="padding:6px 16px;background:var(--primary);color:white;border:none;border-radius:4px;margin-top:6px">批量添加菜谱</button>
+      </div>
       <div style="margin-bottom:15px">
         <div style="margin-bottom:8px;font-weight:500">🥩 肉类（主菜） <span style="font-weight:normal;font-size:0.85em;color:#666">(${recipeDB.meat.length}道)</span></div>
         <div style="display:flex;flex-wrap:wrap;gap:6px">
@@ -524,8 +570,13 @@ function renderSettings(){
           ${Object.entries(INGREDIENTS).map(([name,data],i)=>`<span class="recipe-tag">${name} ${data.protein}g<i onclick="removeIngredient('${name}')">×</i></span>`).join('')}
         </div>
       </div>
+      <div style="margin-top:12px">
+        <div style="font-size:0.85em;color:#666;margin-bottom:6px">批量添加食材（格式：食材名,蛋白质,分类），分类：meat=肉类, seafood=海鲜, leafy=绿叶, vegetable=蔬菜, egg=蛋类, tofu=豆制品, mushroom=蘑菇</div>
+        <textarea id="newIngBatch" placeholder="鸡翅,17.4,meat&#xaquo;虾,17,seafood&#xaquo;豆干,24,tofu" style="width:100%;height:80px;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:0.9em"></textarea>
+        <button onclick="addIngredientBatch()" style="padding:6px 16px;background:var(--primary);color:white;border:none;border-radius:4px;margin-top:8px">批量添加</button>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 80px 80px auto;gap:8px;margin-top:12px">
-        <input type="text" id="newIngName" placeholder="食材名称" style="padding:6px;border:1px solid #ddd;border-radius:4px">
+        <input type="text" id="newIngName" placeholder="单个食材名称" style="padding:6px;border:1px solid #ddd;border-radius:4px">
         <input type="number" id="newIngProtein" placeholder="蛋白" style="padding:6px;border:1px solid #ddd;border-radius:4px">
         <select id="newIngCategory" style="padding:6px;border:1px solid #ddd;border-radius:4px">
           <option value="meat">肉类</option>
@@ -602,6 +653,35 @@ function addRecipe(category){
   if(mainEl)mainEl.value='';
 }
 
+function addRecipeBatch(){
+  const text=document.getElementById('newRecipeBatch')?.value.trim();
+  if(!text){alert('请输入菜谱数据');return;}
+  const lines=text.split(/[\n,，]/).filter(l=>l.trim());
+  let count=0;
+  const catMap={'meat':'meat','seafood':'seafood','leafy':'leafy','reheat':'reheat'};
+  for(const line of lines){
+    const parts=line.split(/[,，\t]/).map(p=>p.trim());
+    if(parts.length>=2){
+      const method=parts[0];
+      const name=parts[1];
+      const cat=(parts[2]||'meat').toLowerCase();
+      const category=catMap[cat]||'meat';
+      if(method&&name){
+        recipeDB[category].push({name,method,ingredients:[{name,qty:200}]});
+        count++;
+      }
+    }
+  }
+  if(count>0){
+    saveRecipeDB();
+    renderSettings();
+    document.getElementById('newRecipeBatch').value='';
+    alert(`成功添加${count}道菜谱`);
+  }else{
+    alert('格式错误，请使用：菜名,主料,分类');
+  }
+}
+
 function removeRecipe(category,index){
   if(confirm('确定删除这道菜吗？')){
     recipeDB[category].splice(index,1);
@@ -625,6 +705,33 @@ function addIngredient(){
   document.getElementById('newIngProtein').value='';
 }
 
+function addIngredientBatch(){
+  const text=document.getElementById('newIngBatch')?.value.trim();
+  if(!text){alert('请输入食材数据');return;}
+  const lines=text.split(/[\n,，]/).filter(l=>l.trim());
+  let count=0;
+  for(const line of lines){
+    const parts=line.split(/[,，\t]/).map(p=>p.trim());
+    if(parts.length>=2){
+      const name=parts[0];
+      const protein=parseFloat(parts[1]);
+      const category=parts[2]||'meat';
+      if(name&&protein){
+        INGREDIENTS[name]={protein,category};
+        count++;
+      }
+    }
+  }
+  if(count>0){
+    saveIngredientsDB();
+    renderSettings();
+    document.getElementById('newIngBatch').value='';
+    alert(`成功添加${count}个食材`);
+  }else{
+    alert('格式错误，请使用：食材名,蛋白质,分类 每行一个');
+  }
+}
+
 function removeIngredient(name){
   if(confirm('确定删除该食材吗？')){
     delete INGREDIENTS[name];
@@ -639,7 +746,7 @@ function resetIngredients(){
       '菠菜':{protein:2.6,category:'leafy'},'白菜':{protein:1.5,category:'leafy'},'蒿子杆':{protein:1.9,category:'leafy'},
       '西兰花':{protein:2.8,category:'leafy'},'西红柿':{protein:0.9,category:'vegetable'},
       '鸡腿肉':{protein:20,category:'meat'},'鸡胸肉':{protein:23.3,category:'meat'},'牛肉':{protein:20.2,category:'meat'},
-      '猪肉':{protein:13.2,category:'meat'},'北极冰虾':{protein:18,category:'seafood'},'鸡蛋':{protein:13.3,category:'egg'},
+'猪肉':{protein:13.2,category:'meat'},'北极冰虾':{protein:18,category:'seafood'},'大虾':{protein:16,category:'seafood'},'虾':{protein:16,category:'seafood'},'鸡蛋':{protein:13.3,category:'egg'},
       '北豆腐':{protein:8.1,category:'tofu'},'干豆腐':{protein:16,category:'tofu'},'平菇':{protein:2.2,category:'mushroom'},
       '香菜':{protein:1.8,category:'leafy'},'辣椒':{protein:1,category:'vegetable'},
       '西葫芦':{protein:0.9},'土豆':{protein:2},'胡萝卜':{protein:1},'洋葱':{protein:1.1}
@@ -744,8 +851,18 @@ function generateRecipe(){
   const leafyRecipes = recipeDB.leafy;
   const reheatRecipes = recipeDB.reheat;
   
+  const findIngredient=(name)=>{
+    if(INGREDIENTS[name])return INGREDIENTS[name];
+    for(const key in INGREDIENTS){
+      if(name.includes(key)||key.includes(name))return INGREDIENTS[key];
+    }
+    return null;
+  };
   const calcProtein=(ingredients)=>{
-    return ingredients.reduce((sum,ing)=>sum+(INGREDIENTS[ing.name]?.protein||0)*ing.qty/100,0);
+    return ingredients.reduce((sum,ing)=>{
+      const data=findIngredient(ing.name);
+      return sum+(data?.protein||0)*ing.qty/100;
+    },0);
   };
   
   const getMainIngredients=(recipe)=>{
@@ -806,6 +923,10 @@ function generateRecipe(){
     const mainProtein=useSeafood?seafood:meat;
     const mainProteinName=useSeafood?seafood.name:meat.name;
     
+    // 同一天避免出现2道红烧口味
+    const isRedCooked=(method)=>method.includes('红烧');
+    const mainIsRedCooked=isRedCooked(mainProtein.method);
+    
     let avh=leafyRecipes.filter(r=>!r.method.includes('蛋')&&r.name!==prevHusbandVeg&&(used.husbandVeg[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋')));
     if(husbandDiabetes){
       avh=avh.filter(r=>{
@@ -822,12 +943,16 @@ function generateRecipe(){
     const husbandVeg=avh.length>0?avh[Math.floor(Math.random()*avh.length)]:leafyRecipes[0];
     used.husbandVeg[husbandVeg.name]=(used.husbandVeg[husbandVeg.name]||0)+1;
     
-    let al=leafyRecipes.filter(r=>r.name!==husbandVeg.name&&!r.method.includes('蛋')&&r.method!==prevLeafy&&(used.leafy[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋')));
+    // 绿叶菜：如果主菜是红烧，绿叶菜不要红烧
+    let al=leafyRecipes.filter(r=>r.name!==husbandVeg.name&&!r.method.includes('蛋')&&r.method!==prevLeafy&&(used.leafy[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋'))&&(!mainIsRedCooked||!r.method.includes('红烧')));
     if(husbandDiabetes){const lg=al.filter(r=>r.lowGI);if(lg.length)al=lg;}
     const leafy=al.length>0?al[Math.floor(Math.random()*al.length)]:leafyRecipes[0];
     used.leafy[leafy.name]=(used.leafy[leafy.name]||0)+1;
     
-    let ar=reheatRecipes.filter(r=>r.name!==leafy.name&&r.name!==husbandVeg.name&&r.method!==prevReheat&&(used.reheat[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋')));
+    // 复热菜：如果主菜+绿叶已有2道红烧，复热菜不要红烧
+    const hasRedCookedMain=mainIsRedCooked;
+    const hasRedCookedLeafy=isRedCooked(leafy.method);
+    let ar=reheatRecipes.filter(r=>r.name!==leafy.name&&r.name!==husbandVeg.name&&r.method!==prevReheat&&(used.reheat[r.name]||0)<2&&(!prevHasEgg||!r.method.includes('蛋'))&&(!(hasRedCookedMain&&hasRedCookedLeafy)||!r.method.includes('红烧')));
     if(husbandDiabetes){
       ar=ar.filter(r=>{
         const ingNames=r.ingredients.map(i=>i.name);
